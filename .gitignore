@@ -1,0 +1,31 @@
+# Generated pipeline artifacts and the GraphRAG workspace / portable DB
+artifacts/
+graphrag_workspace/
+*.duckdb
+wheelhouse/
+
+# Local config / secrets
+.env
+config.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Model caches (should live outside the repo, but ignore if placed here)
+docling_models/
+hf_models/
+tiktoken_cache/

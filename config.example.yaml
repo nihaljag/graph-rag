@@ -1,0 +1,88 @@
+# ============================================================================
+# specgraph configuration — single source of truth.
+# Copy to config.yaml and edit. ${VAR} values are read from the environment
+# (.env is auto-loaded). Every path is validated up front; a missing/incorrect
+# value FAILS LOUD — there are no silent fallbacks and no external network use.
+# ============================================================================
+
+# ----- Local LLM (used for indexing extraction AND by ds_api.py for queries) -----
+llm:
+  base_url: ${LLM_BASE_URL}
+  api_key: ${LLM_API_KEY}
+  model: ${LLM_MODEL}
+  # Custom headers sent on every call. GraphRAG forwards these to LiteLLM via
+  # call_args.extra_headers. Built from the LLM_HEADER_n_* env pairs by config.py,
+  # but you may also list them explicitly here:
+  default_headers: {}
+  # Set true only if your model reliably returns valid JSON for structured output.
+  supports_json: false
+  concurrency: 4
+  max_retries: 5
+  request_timeout: 180
+  temperature: 0
+
+# ----- Local embedding model (HuggingFace safetensors on disk) -----
+embeddings:
+  local_path: ${EMBED_MODEL_PATH}
+  dim: ${EMBED_DIM}
+  device: ${EMBED_DEVICE}
+  batch_size: 16
+  # Prefix some models need (e.g. e5 expects "query: " / "passage: "). Optional.
+  query_prefix: ""
+  passage_prefix: ""
+  normalize: true
+
+# ----- PDF -> Markdown (Docling) -----
+docling:
+  artifacts_path: ${DOCLING_ARTIFACTS}
+  do_table_structure: true
+  do_ocr: false           # turn on only for scanned PDFs (needs OCR models cached)
+
+# ----- Section-based chunking -----
+chunking:
+  target_tokens: 1200     # soft target per chunk
+  max_tokens: 1800        # hard cap -> oversized sections are sub-split
+  prepend_breadcrumb: true
+  encoding_model: cl100k_base
+
+# ----- Deterministic cross-reference graph + retrieval-time expansion -----
+xref:
+  enabled: true
+  inline_resolved_titles: true   # enrich chunk text with resolved reference titles
+  expand_depth: 2                # BFS hops over cross_references.parquet at query time
+  hop_decay: 0.5                 # direct refs (hop 1) outrank indirect (hop 2)
+  expand_token_budget: 0.4       # fraction of the query context window for xref expansion
+  # OPTIONAL, document-agnostic. Leave empty and xref still works via section
+  # numbers + the document's own title index. These are EXAMPLES only.
+  named_references: []
+  # e.g. for NVMe you *may* add:
+  # named_references: ["Status Code Definitions", "Command Effects Log", "Identify Data Structure"]
+
+# ----- Generic per-chunk concept metadata (spec-agnostic) -----
+mentioned_entities:
+  enabled: true
+
+# ----- GraphRAG indexing knobs -----
+graphrag:
+  extract_claims: true           # capture normative shall/should/may requirements as covariates
+  claims_description: "Any normative requirement, constraint, dependency, or behavioral rule stated about an entity (e.g. shall/should/may statements, error/status conditions, references to other sections)."
+  community_reports: true
+  community_level: 2
+  max_gleanings: 1
+  # Generic default entity types — work for ANY technical specification.
+  entity_types: [component, function, parameter, structure, value, state, error, reference, requirement, term]
+  # OPTIONAL domain overlay, appended to the generic set only if you uncomment it.
+  # The core never requires this.
+  # domain_entity_types: [command, register, log, namespace, feature, status_code]
+  response_type: "multiple paragraphs"
+
+# ----- Generic entity normalization (anti-fragmentation) -----
+normalize:
+  enabled: true            # Tier 2: deterministic canonical-key merge (recommended)
+  embed_merge: false       # Tier 3: optional conservative embedding near-duplicate merge
+  embed_threshold: 0.92
+
+# ----- Paths (relative to project root unless absolute) -----
+paths:
+  artifacts_dir: artifacts
+  workspace_dir: graphrag_workspace
