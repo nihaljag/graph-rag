@@ -41,7 +41,6 @@ def _finalize(chunks: list[Chunk], settings: Settings) -> list[Chunk]:
 
 
 def run_chunk_from_markdown(md_path: Path, settings: Settings) -> list[Chunk]:
-    settings.require_tiktoken()
     md_path = Path(md_path)
     markdown = md_path.read_text(encoding="utf-8", errors="replace")
     doc_title = md_path.stem.replace("_", " ").strip() or "Specification"
@@ -59,7 +58,6 @@ def run_chunk_from_markdown(md_path: Path, settings: Settings) -> list[Chunk]:
 
 
 def run_chunk_from_directory(directory: Path, settings: Settings) -> list[Chunk]:
-    settings.require_tiktoken()
     directory = Path(directory)
     if not directory.is_dir():
         raise NotADirectoryError(f"Chunks directory not found: {directory}")

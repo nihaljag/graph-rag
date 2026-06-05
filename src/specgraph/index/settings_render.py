@@ -71,7 +71,7 @@ def build_settings_dict(settings: Settings) -> dict[str, Any]:
         "input_storage": {"type": "file", "base_dir": "input"},
         "output_storage": {"type": "file", "base_dir": "output"},
         "reporting": {"type": "file", "base_dir": "logs"},
-        "cache": {"type": "file", "storage": {"type": "file", "base_dir": "cache"}},
+        "cache": {"type": "none"},   # caching disabled (valid types: json|memory|none)
 
         "chunking": {
             "type": "tokens",

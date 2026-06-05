@@ -32,7 +32,6 @@ def run_build(settings: Settings) -> dict[str, Any]:
     """Synchronous entry point for the indexing phase."""
     settings.require_llm()
     settings.require_embeddings()
-    settings.require_tiktoken()
 
     from specgraph.chunk.manifest import documents_dataframe, load_manifest
     from specgraph.index.settings_render import render_settings

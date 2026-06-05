@@ -35,12 +35,6 @@ def enforce_offline() -> None:
     for key, value in _OFFLINE_FLAGS.items():
         os.environ.setdefault(key, value)
 
-    # Honour a user-provided tiktoken cache so encodings load without network.
-    # (config.py validates that the directory actually exists when required.)
-    cache = os.environ.get("TIKTOKEN_CACHE_DIR")
-    if cache:
-        os.environ.setdefault("TIKTOKEN_CACHE_DIR", cache)
-
     # Best-effort: disable LiteLLM telemetry attribute if the lib is imported.
     try:  # pragma: no cover - litellm may not be installed during unit tests
         import litellm  # type: ignore

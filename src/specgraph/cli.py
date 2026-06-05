@@ -164,7 +164,6 @@ def doctor(config: str = CONFIG_OPT) -> None:
         raise typer.Exit(1)
     typer.secho("  ✔ config.yaml loaded", fg=typer.colors.GREEN)
 
-    check("tiktoken cache", lambda: (settings.require_tiktoken(), "present")[1])
     check("embedding model path", lambda: (settings.require_embeddings(), settings.embeddings.local_path)[1])
     check("docling artifacts (only needed for PDF)", lambda: (settings.require_docling(), settings.docling.artifacts_path)[1])
     check("graphrag importable", _check_graphrag)

@@ -74,13 +74,12 @@ pip install --no-index --find-links wheelhouse -r requirements.txt
 ### One-time offline model prep (on a machine WITH internet)
 
 ```bash
-DOCLING_ARTIFACTS=/path/docling_models \
-TIKTOKEN_CACHE_DIR=/path/tiktoken_cache \
-python scripts/prefetch_docling_models.py
+DOCLING_ARTIFACTS=/path/docling_models python scripts/prefetch_docling_models.py
 ```
 
-Copy `docling_models/` and `tiktoken_cache/` to the offline machine. Also place your
-**HuggingFace embedding model** (safetensors) on disk there.
+Copy `docling_models/` to the offline machine. Also place your **HuggingFace
+embedding model** (safetensors) on disk there. (No tokenizer download is needed —
+token counts are estimated from word counts, so there is no tiktoken dependency.)
 
 ---
 
@@ -95,7 +94,7 @@ Edit `.env`:
 - `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`
 - `LLM_HEADER_1_NAME` / `LLM_HEADER_1_VALUE` (repeat `_2_`, `_3_`, … for more headers)
 - `EMBED_MODEL_PATH`, `EMBED_DIM`, `EMBED_DEVICE`
-- `DOCLING_ARTIFACTS`, `TIKTOKEN_CACHE_DIR`
+- `DOCLING_ARTIFACTS`
 
 `config.yaml` is the single source of truth; `ds_api.py` reads the same config so the
 indexer and your LangChain queries use one endpoint + headers.

@@ -1,16 +1,14 @@
-"""Pre-cache offline model artifacts. RUN THIS ON A MACHINE WITH INTERNET.
+"""Pre-cache Docling's offline models. RUN THIS ON A MACHINE WITH INTERNET.
 
-It downloads:
-  1. Docling layout/table-structure models -> DOCLING_ARTIFACTS
-  2. The tiktoken cl100k_base encoding   -> TIKTOKEN_CACHE_DIR
+It downloads the Docling layout/table-structure models to DOCLING_ARTIFACTS.
+Then copy that directory to the offline target and point config.yaml/.env at it.
+NOTE: do NOT import specgraph here — that package forces offline mode.
 
-Then copy both directories to the offline target and point config.yaml/.env at
-them. NOTE: do NOT import specgraph here — that package forces offline mode.
+(No tokenizer prefetch is needed: specgraph estimates tokens from word counts,
+so there is no tiktoken dependency.)
 
 Usage:
-    DOCLING_ARTIFACTS=/path/docling_models \
-    TIKTOKEN_CACHE_DIR=/path/tiktoken_cache \
-    python scripts/prefetch_docling_models.py
+    DOCLING_ARTIFACTS=/path/docling_models python scripts/prefetch_docling_models.py
 """
 
 from __future__ import annotations
@@ -34,26 +32,11 @@ def prefetch_docling(artifacts_dir: Path) -> None:
         raise
 
 
-def prefetch_tiktoken(cache_dir: Path) -> None:
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    os.environ["TIKTOKEN_CACHE_DIR"] = str(cache_dir)
-    print(f"[tiktoken] caching cl100k_base to {cache_dir} …")
-    import tiktoken
-
-    enc = tiktoken.get_encoding("cl100k_base")
-    assert enc.encode("hello world")  # force materialization
-    print("[tiktoken] done.")
-
-
 def main() -> int:
     artifacts = Path(os.environ.get("DOCLING_ARTIFACTS", "docling_models"))
-    cache = Path(os.environ.get("TIKTOKEN_CACHE_DIR", "tiktoken_cache"))
     prefetch_docling(artifacts)
-    prefetch_tiktoken(cache)
-    print("\nCopy these to the offline machine and set DOCLING_ARTIFACTS / "
-          "TIKTOKEN_CACHE_DIR in .env:")
+    print("\nCopy this to the offline machine and set DOCLING_ARTIFACTS in .env:")
     print(f"  DOCLING_ARTIFACTS={artifacts.resolve()}")
-    print(f"  TIKTOKEN_CACHE_DIR={cache.resolve()}")
     return 0
 
 

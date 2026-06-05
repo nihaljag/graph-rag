@@ -157,15 +157,6 @@ class Settings:
         return self.workspace_dir / "output"
 
     # ---- phase-scoped validation (fail loud) ----
-    def require_tiktoken(self) -> None:
-        cache = os.environ.get("TIKTOKEN_CACHE_DIR")
-        if not cache or not Path(cache).is_dir():
-            raise ConfigError(
-                "TIKTOKEN_CACHE_DIR is required and must point at a directory holding "
-                "the pre-downloaded tiktoken encoding files (offline). "
-                "Run scripts/prefetch_docling_models.py's tiktoken step on an online box."
-            )
-
     def require_docling(self) -> None:
         p = Path(self.docling.artifacts_path)
         if not self.docling.artifacts_path or not p.is_dir():

@@ -35,8 +35,6 @@ MD = textwrap.dedent("""
 def settings(tmp_path, monkeypatch):
     emb = tmp_path / "emb"; emb.mkdir(); (emb / "config.json").write_text("{}")
     doc = tmp_path / "doc"; doc.mkdir()
-    tok = tmp_path / "tok"; tok.mkdir()
-    monkeypatch.setenv("TIKTOKEN_CACHE_DIR", str(tok))
 
     cfg = tmp_path / "config.yaml"
     cfg.write_text(textwrap.dedent(f"""

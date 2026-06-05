@@ -4,8 +4,8 @@ One chunk == one logical section (or a size-bounded part of a large section).
 Tables are never split mid-table unless a single table exceeds the hard token
 cap, in which case it is split at row boundaries with the header row repeated.
 
-This module is dependency-light (only the offline tiktoken counter) and entirely
-specification-agnostic.
+This module is dependency-free (token counts are estimated from word counts) and
+entirely specification-agnostic.
 """
 
 from __future__ import annotations
