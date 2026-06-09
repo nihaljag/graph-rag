@@ -59,7 +59,7 @@ class LocalSearchDB:
             )
 
         from specgraph.llm.register import register_models
-        register_models()
+        register_models(settings)
 
         # Load tables.
         self._entities = _read_parquet(self.db_dir / "entities.parquet")

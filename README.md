@@ -122,6 +122,19 @@ gridx build path/to/chunks_dir --from chunks
 
 Or run phases individually: `gridx convert`, `gridx chunk --from md|chunks`, `gridx index`.
 
+### Progress & logging (long indexing runs)
+
+Indexing a large spec makes many LLM calls and can take a while. The build prints:
+- each **workflow** start/end (`extract_graph`, `extract_claims`, `community_report`, …),
+- each **LLM call** with a running counter, in-flight count, and a label describing what
+  it's for (e.g. `LLM #842 [extract_graph] (in-flight 4)`), plus slow-call flags,
+- a periodic **heartbeat** so even a single long task shows liveness:
+  `⏳ working [community_report] | elapsed 6m12s | LLM: 840 done, 4 in-flight, 0 failed`.
+
+Tune or disable via the `logging:` block in `config.yaml` (`llm_calls`,
+`heartbeat_seconds`, `slow_call_seconds`, `snippet_chars`). Setting `llm_calls: false`
+uses the plain LiteLLM provider (custom headers are unaffected either way).
+
 The portable DB is written to `graphrag_workspace/output/`:
 `entities/relationships/communities/community_reports/text_units/documents/covariates.parquet`
 + `lancedb/` + `cross_references.parquet` + `entity_aliases.parquet` +

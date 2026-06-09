@@ -114,6 +114,14 @@ class NormalizeSettings:
 
 
 @dataclass
+class LoggingSettings:
+    llm_calls: bool = True          # log each LLM call with a task label + counter
+    heartbeat_seconds: float = 15.0  # liveness heartbeat during long workflows
+    slow_call_seconds: float = 20.0  # flag LLM calls slower than this
+    snippet_chars: int = 90          # length of prompt snippet used as a label
+
+
+@dataclass
 class Settings:
     root: Path
     llm: LLMSettings
@@ -124,6 +132,7 @@ class Settings:
     mentioned_entities_enabled: bool
     graphrag: GraphRagSettings
     normalize: NormalizeSettings
+    logging: LoggingSettings
     artifacts_dir: Path
     workspace_dir: Path
 
@@ -316,6 +325,14 @@ def load_settings(config_path: str | os.PathLike[str] | None = None) -> Settings
         embed_threshold=float(nm_raw.get("embed_threshold", 0.92)),
     )
 
+    lg_raw = raw.get("logging", {})
+    logging_settings = LoggingSettings(
+        llm_calls=bool(lg_raw.get("llm_calls", True)),
+        heartbeat_seconds=float(lg_raw.get("heartbeat_seconds", 15)),
+        slow_call_seconds=float(lg_raw.get("slow_call_seconds", 20)),
+        snippet_chars=_as_int(lg_raw.get("snippet_chars", 90), "logging.snippet_chars"),
+    )
+
     paths_raw = raw.get("paths", {})
     artifacts_dir = _resolve(root, paths_raw.get("artifacts_dir", "artifacts"))
     workspace_dir = _resolve(root, paths_raw.get("workspace_dir", "graphrag_workspace"))
@@ -330,6 +347,7 @@ def load_settings(config_path: str | os.PathLike[str] | None = None) -> Settings
         mentioned_entities_enabled=bool(raw.get("mentioned_entities", {}).get("enabled", True)),
         graphrag=graphrag,
         normalize=normalize,
+        logging=logging_settings,
         artifacts_dir=artifacts_dir,
         workspace_dir=workspace_dir,
     )

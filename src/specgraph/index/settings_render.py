@@ -40,8 +40,11 @@ def build_settings_dict(settings: Settings) -> dict[str, Any]:
     if llm.default_headers:
         call_args["extra_headers"] = dict(llm.default_headers)
 
+    # Use the logging chat provider when call logging is enabled (default), else
+    # the stock litellm provider. Both carry custom headers via call_args.
+    chat_type = "logging_litellm" if settings.logging.llm_calls else "litellm"
     completion_model: dict[str, Any] = {
-        "type": "litellm",
+        "type": chat_type,
         "model_provider": "openai",   # OpenAI-compatible local endpoint
         "model": llm.model,
         "api_base": llm.base_url,

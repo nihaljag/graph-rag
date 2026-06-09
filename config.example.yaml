@@ -82,6 +82,13 @@ normalize:
   embed_merge: false       # Tier 3: optional conservative embedding near-duplicate merge
   embed_threshold: 0.92
 
+# ----- Progress / logging during indexing -----
+logging:
+  llm_calls: true          # log every LLM call with a task label + running counter
+  heartbeat_seconds: 15    # liveness heartbeat (current workflow, elapsed, call counts)
+  slow_call_seconds: 20    # flag any single LLM call slower than this
+  snippet_chars: 90        # prompt-snippet length used as a call label
+
 # ----- Paths (relative to project root unless absolute) -----
 paths:
   artifacts_dir: artifacts

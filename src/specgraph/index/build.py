@@ -36,13 +36,14 @@ def run_build(settings: Settings) -> dict[str, Any]:
     from specgraph.chunk.manifest import documents_dataframe, load_manifest
     from specgraph.index.settings_render import render_settings
     from specgraph.index.normalize_entities import build_entity_aliases
+    from specgraph.index.progress import ConsoleWorkflowCallbacks, HeartbeatMonitor
     from specgraph.llm.register import register_models
 
     rows = load_manifest(settings.manifest_path)
     if not rows:
         raise RuntimeError("Chunk manifest is empty; run the chunk phase first.")
 
-    register_models()
+    register_models(settings)
 
     with phase("render settings.yaml"):
         render_settings(settings)
@@ -56,7 +57,9 @@ def run_build(settings: Settings) -> dict[str, Any]:
     log.info("Indexing %d section chunks via GraphRAG build_index …", len(documents))
 
     with phase("GraphRAG build_index (entities, relationships, claims, communities, embeddings)"):
-        asyncio.run(_run_index(config, documents))
+        callbacks = ConsoleWorkflowCallbacks()
+        with HeartbeatMonitor(callbacks, interval=settings.logging.heartbeat_seconds):
+            asyncio.run(_run_index(config, documents, callbacks))
 
     if settings.normalize.enabled:
         with phase("entity normalization (alias map)"):
@@ -69,10 +72,13 @@ def run_build(settings: Settings) -> dict[str, Any]:
     return {"output_dir": str(settings.output_dir), "n_chunks": len(rows)}
 
 
-async def _run_index(config: Any, documents: Any) -> None:
+async def _run_index(config: Any, documents: Any, callbacks: Any = None) -> None:
     from graphrag.api.index import build_index
 
-    results = await build_index(config, input_documents=documents)
+    results = await build_index(
+        config, input_documents=documents,
+        callbacks=[callbacks] if callbacks is not None else None,
+    )
     errors = [r for r in results if getattr(r, "errors", None)]
     if errors:
         # Surface the first error loudly; the logs dir has full detail.
